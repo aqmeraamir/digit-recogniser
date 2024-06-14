@@ -44,40 +44,63 @@ class Layer:
         self.activations = []
 
         for neuron in self.neurons:
-            neuron.weighted_sum = 0
-            neuron.activation = 0
-        
-            neuron.weighted_sum = np.dot(neuron.weights, previous_activations) + neuron.bias
-            neuron.activation = sig(neuron.weighted_sum)
-            
+            neuron.weighted_sum = np.dot(neuron.weights, previous_activations) + neuron.bias        
             self.weighted_sums.append(neuron.weighted_sum)
-            self.activations.append(neuron.activation)
-
-
-        self.weighted_sums = np.array(self.weighted_sums)
-        self.activations = np.array(self.activations)
+        
+        if len(self.neurons) == 4:
+            self.activations = softmax(self.weighted_sums)
+            
+        else:
+            self.activations = sig(self.weighted_sums)
+        
+        for neuron, activation in zip(self.neurons, self.activations):
+            neuron.activation = activation
 
 #-------------------------------------------
 # Subroutines
 #-------------------------------------------
 
-# Sigmoid function
+# Non-linear activation functions
 def sig(x):
+    x = np.array(x)
     return 1/(1 + np.exp(-x))
 
-# Derivatives & Cost functions (taken from 3blue1brown youtube video titled 'Backpropagation calculus | Chapter 4, Deep learning') *slightly modified to use error as a parameter for (given - expected activation)
 def sig_derivative(x):
     sigmoid = sig(x)
     return sigmoid * (1 - sigmoid)
 
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))  # stability improvement
+    return exp_x / exp_x.sum(axis=0)
+
+def softmax_derivative(softmax_output):
+    softmax_output = np.array(softmax_output)
+    s = softmax_output.reshape(-1, 1)
+    return np.diagflat(s) - np.dot(s, s.T)
+
+
+
+# Derivatives & Cost functions:
+
+# Using sigmoid
 def weight_derivative(previous_activation, weighted_sum, error):
     return previous_activation * sig_derivative(weighted_sum) * 2 * error
 
 def bias_derivative(weighted_sum, error):
     return sig_derivative(weighted_sum) * 2 * error
 
-def activation_derivative(weights, weighted_sum, error):
-    return weights * sig_derivative(weighted_sum) * 2 * error
+def activation_derivative(weight, weighted_sum, error):
+    return weight * sig_derivative(weighted_sum) * 2 * error
+
+# Using softmax
+def softmax_weight_derivative(previous_activation, weighted_sum, error):
+    return previous_activation * softmax_derivative(weighted_sum) * 2 * error
+
+def softmax_bias_derivative(weighted_sum, error):
+    return softmax_derivative(weighted_sum) * 2 * error
+
+def softmax_activation_derivative(weights, weighted_sum, error):
+    return weights * softmax_derivative(weighted_sum) * 2 * error
 
 def cost(output_activations, expected_activations):
     return np.sum(np.power(output_activations - expected_activations, 2))
@@ -98,61 +121,51 @@ def backPropagation(input_activations, layer1, layer2, output_layer, expected_ac
     # Output layer
     output_errors = []
     for output_neuron, expected_activation in zip(output_layer.neurons, expected_activations):
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
         output_error = output_neuron.activation - expected_activation
         output_errors.append(output_error)
-
-        for layer2_neuron in layer2.neurons:
-            neuron_weight_gradients.append(weight_derivative(layer2_neuron.activation, output_neuron.weighted_sum, output_error))
-
+ 
+        neuron_weight_gradients = weight_derivative(layer2.activations, output_neuron.weighted_sum, output_error)
         neuron_bias_gradient = bias_derivative(output_neuron.weighted_sum, output_error)
         
-        output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #output_neuron.weight_gradients.append(neuron_weight_gradients)
-        #output_neuron.bias_gradients.append(neuron_bias_gradient)
+        output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
 
 
     # Layer 2
     layer2_errors = []
     for l2_index, layer2_neuron in enumerate(layer2.neurons):
-        layer2_error = 0
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
-        for o_index, output_neuron in enumerate(output_layer.neurons):
-            layer2_error += activation_derivative(output_neuron.weights[l2_index], output_neuron.weighted_sum, output_errors[o_index])
-      
+        output_weights = []
+        output_weighted_sums = []
+        for output_neuron in output_layer.neurons:
+            output_weights.append(output_neuron.weights[l2_index])
+            output_weighted_sums.append(output_neuron.weighted_sum)
+
+        layer2_error = np.sum(activation_derivative(output_weights, output_weighted_sums, output_errors))
         layer2_errors.append(layer2_error)
 
-        for layer1_neuron in layer1.neurons:
-            neuron_weight_gradients.append(weight_derivative(layer1_neuron.activation, layer2_neuron.weighted_sum, layer2_error))
-        
+        neuron_weight_gradients = weight_derivative(layer1.activations, layer2_neuron.weighted_sum, layer2_error)
         neuron_bias_gradient = bias_derivative(layer2_neuron.weighted_sum, layer2_error)
         
-        layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #layer2_neuron.weight_gradients.append(neuron_weight_gradients)
-        #layer2_neuron.bias_gradients.append(neuron_bias_gradient)
-
+        layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
+ 
 
     # Layer 1
+    input_activations = np.array(input_activations)
     for l1_index, layer1_neuron in enumerate(layer1.neurons):
-        layer1_error = 0
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
-        for l2_index, layer2_neuron in enumerate(layer2.neurons):
-            layer1_error += activation_derivative(layer2_neuron.weights[l1_index], layer2_neuron.weighted_sum, layer2_errors[l2_index])
+        l2_weights = []
+        l2_weighted_sums = []
+        for layer2_neuron in layer2.neurons:
+            l2_weights.append(layer2_neuron.weights[l1_index])
+            l2_weighted_sums.append(layer2_neuron.weighted_sum)
 
-        for activation in input_activations:
-            neuron_weight_gradients.append(weight_derivative(activation, layer1_neuron.weighted_sum, layer1_error))
+        layer1_error = np.sum(activation_derivative(l2_weights, l2_weighted_sums, layer2_errors))
 
+        neuron_weight_gradients = weight_derivative(input_activations, layer1_neuron.weighted_sum, layer1_error)
         neuron_bias_gradient = bias_derivative(layer1_neuron.weighted_sum, layer1_error)
 
-        layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #layer1_neuron.weight_gradients.append(neuron_weight_gradients)
-        #ayer1_neuron.bias_gradients.append(neuron_bias_gradient)
+        layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
 
 
 # Fucntion to train the neural network
@@ -222,12 +235,13 @@ two_expected_output = [0, 0, 1, 0]
 three_expected_output = [0, 0, 0, 1]
 
 
-for i in range(50000):
+for i in range(10000):
     feedData()
+
 
 
 # User interface - ask user for a denary number, and then propagate it through the nerwork
 binary_number = input("Enter a 2-bit binary number: ")
 input_array = [int(char) for char in list(binary_number)]
 
-recogniseBinary(one_input, layers)
+recogniseBinary(input_array, layers)

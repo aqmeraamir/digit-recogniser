@@ -4,22 +4,32 @@ Github: https://github.com/aqmeraamir
 
 Notes:
 - this program is based on the first 4 videos of 3blue1brown's playlist on deep learning on youtube (https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
+- entire neural network is mostly created from scratch, without libraries such as TensorFlow or PyTorch
 - consists of 4 layers:
     1. input layer (784 input neurons that each contain a grayscalue value 0-1 of a pixel), hidden 
     2. hidden layer 1 (16 neurons, each with 784 weights)
     3. hidden layer 2 (16 neurons, each with 16 weights)
     4. output layer (10 neurons with each representing a digit between 0-9; each neuron has 16 weights)
-    
+
+- includes a graph of how cost changes as the network is trained
+
 '''
 
 # Importing libraries
 from PIL import Image
+import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import math
+import os 
 
 # CONSTANTS
 LEARNING_RATE = 0.01
+
+LAYER1_SIZE = 90
+LAYER2_SIZE = 90
+OUTPUT_SIZE = 10
+
 
 #-------------------------------------------
 # Classes for neurons & layers
@@ -67,18 +77,19 @@ class Layer:
         self.activations = []
 
         for neuron in self.neurons:
-            neuron.weighted_sum = 0
-            neuron.activation = 0
-        
-            neuron.weighted_sum = np.dot(neuron.weights, previous_activations) + neuron.bias
-            neuron.activation = sig(neuron.weighted_sum)
-            
+            neuron.weighted_sum = np.dot(neuron.weights, previous_activations) + neuron.bias        
             self.weighted_sums.append(neuron.weighted_sum)
-            self.activations.append(neuron.activation)
+        
+        if len(self.neurons) == OUTPUT_SIZE:
+            self.activations = softmax(self.weighted_sums)
+            
+        else:
+            self.activations = sig(self.weighted_sums)
+        
+        for neuron, activation in zip(self.neurons, self.activations):
+            neuron.activation = activation
 
 
-        self.weighted_sums = np.array(self.weighted_sums)
-        self.activations = np.array(self.activations)
 
     # Functions to save and load parameters of the layer
     def getParams(self):
@@ -94,7 +105,12 @@ class Layer:
 
 # Math functions
 def sig(x):
+    x = np.array(x)
     return 1/(1 + np.exp(-x))
+
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))  # stability improvement
+    return exp_x / exp_x.sum(axis=0)
 
 def round_sf(number, sf):
     if number == 0:
@@ -110,8 +126,13 @@ def sig_derivative(x):
     sigmoid = sig(x)
     return sigmoid * (1 - sigmoid)
 
+def softmax_derivative(softmax_output):
+    s = softmax_output.reshape(-1, 1)
+    return np.diagflat(s) - np.dot(s, s.T)
+
 def weight_derivative(previous_activation, weighted_sum, error):
     return previous_activation * sig_derivative(weighted_sum) * 2 * error
+
 
 def bias_derivative(weighted_sum, error):
     return sig_derivative(weighted_sum) * 2 * error
@@ -138,64 +159,54 @@ def backPropagation(input_activations, layer1, layer2, output_layer, expected_ac
     # Output layer
     output_errors = []
     for output_neuron, expected_activation in zip(output_layer.neurons, expected_activations):
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
         output_error = output_neuron.activation - expected_activation
         output_errors.append(output_error)
-
-        for layer2_neuron in layer2.neurons:
-            neuron_weight_gradients.append(weight_derivative(layer2_neuron.activation, output_neuron.weighted_sum, output_error))
-
+ 
+        neuron_weight_gradients = weight_derivative(layer2.activations, output_neuron.weighted_sum, output_error)
         neuron_bias_gradient = bias_derivative(output_neuron.weighted_sum, output_error)
         
-        output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #output_neuron.weight_gradients.append(neuron_weight_gradients)
-        #utput_neuron.bias_gradients.append(neuron_bias_gradient)
+        output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
 
 
     # Layer 2
     layer2_errors = []
     for l2_index, layer2_neuron in enumerate(layer2.neurons):
-        layer2_error = 0
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
-        for o_index, output_neuron in enumerate(output_layer.neurons):
-            layer2_error += activation_derivative(output_neuron.weights[l2_index], output_neuron.weighted_sum, output_errors[o_index])
-      
+        output_weights = []
+        output_weighted_sums = []
+        for output_neuron in output_layer.neurons:
+            output_weights.append(output_neuron.weights[l2_index])
+            output_weighted_sums.append(output_neuron.weighted_sum)
+
+        layer2_error = np.sum(activation_derivative(output_weights, output_weighted_sums, output_errors))
         layer2_errors.append(layer2_error)
 
-        for layer1_neuron in layer1.neurons:
-            neuron_weight_gradients.append(weight_derivative(layer1_neuron.activation, layer2_neuron.weighted_sum, layer2_error))
-        
+        neuron_weight_gradients = weight_derivative(layer1.activations, layer2_neuron.weighted_sum, layer2_error)
         neuron_bias_gradient = bias_derivative(layer2_neuron.weighted_sum, layer2_error)
         
-        layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #layer2_neuron.weight_gradients.append(neuron_weight_gradients)
-        #layer2_neuron.bias_gradients.append(neuron_bias_gradient)
-
+        layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
+ 
 
     # Layer 1
+    input_activations = np.array(input_activations)
     for l1_index, layer1_neuron in enumerate(layer1.neurons):
-        layer1_error = 0
-        neuron_weight_gradients = []
-        neuron_bias_gradient = 0
 
-        for l2_index, layer2_neuron in enumerate(layer2.neurons):
-            layer1_error += activation_derivative(layer2_neuron.weights[l1_index], layer2_neuron.weighted_sum, layer2_errors[l2_index])
+        l2_weights = []
+        l2_weighted_sums = []
+        for layer2_neuron in layer2.neurons:
+            l2_weights.append(layer2_neuron.weights[l1_index])
+            l2_weighted_sums.append(layer2_neuron.weighted_sum)
 
-        for activation in input_activations:
-            neuron_weight_gradients.append(weight_derivative(activation, layer1_neuron.weighted_sum, layer1_error))
+        layer1_error = np.sum(activation_derivative(l2_weights, l2_weighted_sums, layer2_errors))
 
+        neuron_weight_gradients = weight_derivative(input_activations, layer1_neuron.weighted_sum, layer1_error)
         neuron_bias_gradient = bias_derivative(layer1_neuron.weighted_sum, layer1_error)
 
-        layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient)
-        #layer1_neuron.weight_gradients.append(neuron_weight_gradients)
-        #layer1_neuron.bias_gradients.append(neuron_bias_gradient)
+        layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
 
 
-# Fucntion to train the neural network
+# Function to train the neural network
 def train(input_activations, expected_activations, layers):
     feedForwardInput(input_activations, layers)
     backPropagation(input_activations, layers[0], layers[1], layers[-1], expected_activations)   
@@ -223,19 +234,19 @@ def initialiseImage(file_path):
          
 
 # Functions to save & load the neural network model
-def saveModel(layers, filename='model.pkl'):
+def saveModel(layers, filename='model_data.pkl'):
     model_params = [layer.getParams() for layer in layers]
     with open(filename, 'wb') as file:
         pickle.dump(model_params, file)
     
-def loadModel(filename='model.pkl'):
+def loadModel(filename='model_data.pkl'):
     with open(filename, 'rb') as file:
         model_params = pickle.load(file)
 
     # Reinitialise the layers
-    layer1 = Layer(16, 784)
-    layer2 = Layer(16, 16)
-    output_layer = Layer(10, 16)
+    layer1 = Layer(LAYER1_SIZE, 784)
+    layer2 = Layer(LAYER2_SIZE, LAYER1_SIZE)
+    output_layer = Layer(OUTPUT_SIZE, LAYER2_SIZE)
 
     layers = [layer1, layer2, output_layer]
 
@@ -247,11 +258,31 @@ def loadModel(filename='model.pkl'):
 
 # Functions to initialise (reset), train or feed input into the model for the user interface
 def initialiseModel():
-    layers = [Layer(16, 784), Layer(16, 16), Layer(10, 16)]
+    layers = [Layer(LAYER1_SIZE, 784), Layer(LAYER2_SIZE, LAYER1_SIZE), Layer(OUTPUT_SIZE, LAYER2_SIZE)]
     saveModel(layers)
     return layers
 
-def trainModel(iterations):
+def trainModel(iterations, use_live_graph, use_graph):
+    def update_plot(average_costs):
+        line.set_linewidth(0.35)
+        line.set_data(range(len(average_costs)), average_costs)
+
+        ax.set_ylim(0, 1)
+
+        ax.relim()
+        ax.autoscale_view()
+
+        plt.draw()
+        plt.pause(0.005)
+
+    # Initialize plotting for a real-time graph
+    if use_live_graph:
+        plt.ion() 
+        ax = plt.subplots()[1]
+        ax.set_xlabel('Iteration')
+        ax.set_ylabel('Average Cost')
+        line, = ax.plot([], [], 'r-') 
+
     average_costs = []
     for i in range(iterations):
         costs = []
@@ -263,16 +294,34 @@ def trainModel(iterations):
             cost_of_image = train(image_array, expected_output, layers)
             costs.append(cost_of_image)
 
-        if i%100 == 1: saveModel(layers) # Save the model every 100 iterations
-        average_costs.append(np.mean(costs))
-        print(f'{i} - Average Cost: {average_costs[i]}')
+        if (i + 1) % 150 == 0: saveModel(layers)  # Save the model every 100 iterations
+
+        average_cost = np.mean(costs)
+        average_costs.append(average_cost)
+
+        print(f'{i} - Average Cost: {average_cost}')
+        
+        # Update the real-time graphwith new data
+        if use_live_graph: update_plot(average_costs)
+
+    # Plot a graph for average costs
+    if use_graph:
+        plt.xlabel('Iteration')
+        plt.ylabel('Training error')
+        plt.ylim(0, 1)
+        plt.plot(range(len(average_costs)), average_costs, linewidth=0.35)
+     
+    if use_live_graph: plt.ioff()  # Turn off interactive mode
     
-    n = 5
+    # Calculate the average decrease in cost after training
+    n = 50
     average_start = sum(average_costs[:n]) / n 
     average_end = sum(average_costs[-n:]) / n
-    return average_start - average_end # Calculate the average decrease in cost after training
 
-# Predict what number is in an image
+    return average_start - average_end
+
+
+# Predict what digit is in an image by propagating its array through the layers
 def recogniseDigit(filename, layers):
     image_array = initialiseImage(filename)
     
@@ -301,9 +350,12 @@ def recogniseDigit(filename, layers):
 #-------------------------------------------
 
 while True:
+    # If data file doesn't exist, creat one
+    if os.path.exists('model_data.pkl') == False: 
+        initialiseModel()
+
     # Initialise layers by loading them
-    hidden_layer1, hidden_layer2, output_layer = loadModel('model.pkl')
-    layers = [hidden_layer1, hidden_layer2, output_layer]
+    layers = loadModel('model_data.pkl')
 
     # User interface
     print('\n---------- Handwritten Digit Recognisor - MENU ----------')
@@ -314,7 +366,6 @@ while True:
     print('---------------------------------------------------------')
     menu_input = input('Choose action (1-4): ')
 
-
     match menu_input:
         case '1':
             file_path = input('Enter filepath/url to a handwritten image (28x28 png): ')
@@ -322,8 +373,9 @@ while True:
 
         case '2':
             iterations = int(input('With how many images do you want to train the network (30-10000)? '))
-            cost_decrease = trainModel(iterations)  
-            print(f'\nMean decrease in overall cost: {round_sf(cost_decrease, 4)}\nTraining complete.')  
+            cost_decrease = trainModel(iterations, True, False)  
+            plt.show() # Display the graph
+            print(f'\nMean decrease in cost: {round_sf(cost_decrease, 4)}\nTraining complete.')  
 
         case '3':
             initialiseModel()
