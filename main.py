@@ -32,9 +32,9 @@ LAYER1_SIZE = 16
 LAYER2_SIZE = 16
 OUTPUT_SIZE = 10
 
-DATA_SIZE = 1
+DATA_SIZE = 10000
 BATCH_SIZE = 1
-VALIDATION_SIZE = 1
+VALIDATION_SIZE = 500
 
 USE_LIVE_GRAPH = True
 USE_STATIC_GRAPH = False
@@ -96,6 +96,7 @@ class Layer:
     def setParams(self, params):
         for neuron, param in zip(self.neurons, params):
             neuron.setParams(param)
+
 
 #-------------------------------------------
 # Subroutines
@@ -256,7 +257,7 @@ def trainModel(epochs):
         ax = plt.subplots()[1]
         ax.set_xlabel('Epoch')
         ax.set_ylabel('Loss')
-        ax.set_ylim(0, 1.6)
+        ax.set_ylim(0, 0.4)
 
         training_line, = ax.plot([], [], 'r-', label='Training Loss', linewidth=0.35) 
         validation_line, = ax.plot([], [], 'b--', label='Validation Loss', linewidth=0.35) 
@@ -299,8 +300,6 @@ def trainModel(epochs):
         print(f'{_} training loss: {epoch_training_loss}')
         training_losses.append(epoch_training_loss)
 
-
-        
         saveModel(layers) # Save the updated weights & biases after each epoch
 
         # Update the real-time graph with new data
