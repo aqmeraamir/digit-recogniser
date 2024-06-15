@@ -24,16 +24,19 @@ import math
 import os 
 
 # CONSTANTS
+FILENAME = 'model_data.pkl'
+
 LEARNING_RATE = 0.01
 
-LAYER1_SIZE = 128
-LAYER2_SIZE = 128
+LAYER1_SIZE = 16
+LAYER2_SIZE = 16
 OUTPUT_SIZE = 10
 
-DATA_SIZE = 100
-BATCH_SIZE = 10
+DATA_SIZE = 1
+BATCH_SIZE = 1
+VALIDATION_SIZE = 1
 
-USE_LIVE_GRAPH = False
+USE_LIVE_GRAPH = True
 USE_STATIC_GRAPH = False
 
 #-------------------------------------------
@@ -42,10 +45,7 @@ USE_STATIC_GRAPH = False
 class Neuron:
    
     def __init__(self, weights_required):
-        #self.weights = np.random.uniform(-0.1, 0.1, weights_required)  # small random weights
         self.weights = np.random.randn(weights_required) * np.sqrt(2 / weights_required)
-
-        #self.bias = np.random.uniform(-0.1, 0.1)  # small random bias
         self.bias = 0
 
         self.weighted_sum = 0
@@ -79,16 +79,11 @@ class Layer:
     
     def feedForward(self, previous_activations):
         self.weighted_sums = []
-        self.activations = []
 
         for neuron in self.neurons:
             neuron.weighted_sum = np.dot(neuron.weights, previous_activations) + neuron.bias        
             self.weighted_sums.append(neuron.weighted_sum)
         
-        #if len(self.neurons) == OUTPUT_SIZE:
-            #self.activations = softmax(self.weighted_sums)
-            
-        #else:
         self.activations = sig(self.weighted_sums)
         
         for neuron, activation in zip(self.neurons, self.activations):
@@ -111,10 +106,6 @@ def sig(x):
     x = np.array(x)
     return 1/(1 + np.exp(-x))
 
-def softmax(x):
-    exp_x = np.exp(x - np.max(x))  # stability improvement
-    return exp_x / exp_x.sum(axis=0)
-
 def round_sf(number, sf):
     if number == 0:
         return 0.0
@@ -129,13 +120,8 @@ def sig_derivative(x):
     sigmoid = sig(x)
     return sigmoid * (1 - sigmoid)
 
-def softmax_derivative(softmax_output):
-    s = softmax_output.reshape(-1, 1)
-    return np.diagflat(s) - np.dot(s, s.T)
-
 def weight_derivative(previous_activation, weighted_sum, error):
     return previous_activation * sig_derivative(weighted_sum) * 2 * error
-
 
 def bias_derivative(weighted_sum, error):
     return sig_derivative(weighted_sum) * 2 * error
@@ -160,31 +146,24 @@ def feedForwardInput(input_activations, layers):
 def backPropagation(input_activations, expected_activations, layer1, layer2, output_layer):
 
     # Output layer
-    output_errors = []
-    for output_neuron, expected_activation in zip(output_layer.neurons, expected_activations):
-
-        output_error = output_neuron.activation - expected_activation
-        output_errors.append(output_error)
-
-        neuron_weight_gradients = weight_derivative(layer2.activations, output_neuron.activation, output_error)
-        neuron_bias_gradient = bias_derivative(output_neuron.activation, output_error)
+    output_errors = output_layer.activations - expected_activations
+    for i, output_neuron in enumerate(output_layer.neurons):
+        neuron_weight_gradients = weight_derivative(layer2.activations, output_neuron.activation, output_errors[i])
+        neuron_bias_gradient = bias_derivative(output_neuron.activation, output_errors[i])
 
         #output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
         output_neuron.weight_gradients.append(neuron_weight_gradients)
         output_neuron.bias_gradients.append(neuron_bias_gradient)
 
     # Layer 2
-    layer2_errors = []
-    for l2_index, layer2_neuron in enumerate(layer2.neurons):
-        output_weights = []
-        for output_neuron in output_layer.neurons:
-            output_weights.append(output_neuron.weights[l2_index])
+    layer2_errors = np.zeros(len(layer2.neurons))
+    output_weights = np.array([neuron.weights for neuron in output_layer.neurons])
+    for j, layer2_neuron in enumerate(layer2.neurons):
+        weights = output_weights[:, j]
+        layer2_errors[j] = np.sum(activation_derivative(weights, output_layer.weighted_sums, output_errors))
 
-        layer2_error = np.sum(activation_derivative(output_weights, output_layer.weighted_sums, output_errors))
-        layer2_errors.append(layer2_error)
-
-        neuron_weight_gradients = weight_derivative(layer1.activations, layer2_neuron.weighted_sum, layer2_error)
-        neuron_bias_gradient = bias_derivative(layer2_neuron.weighted_sum, layer2_error)
+        neuron_weight_gradients = weight_derivative(layer1.activations, layer2_neuron.weighted_sum, layer2_errors[j])
+        neuron_bias_gradient = bias_derivative(layer2_neuron.weighted_sum, layer2_errors[j])
         
         #layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
         layer2_neuron.weight_gradients.append(neuron_weight_gradients)
@@ -192,13 +171,10 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
 
     # Layer 1
     input_activations = np.array(input_activations)
-    for l1_index, layer1_neuron in enumerate(layer1.neurons):
-
-        l2_weights = []
-        for layer2_neuron in layer2.neurons:
-            l2_weights.append(layer2_neuron.weights[l1_index])
-
-        layer1_error = np.sum(activation_derivative(l2_weights, layer2.weighted_sums, layer2_errors))
+    l2_weights = np.array([neuron.weights for neuron in layer2.neurons])
+    for k, layer1_neuron in enumerate(layer1.neurons):
+        weights = l2_weights[:, k]
+        layer1_error = np.sum(activation_derivative(weights, layer2.weighted_sums, layer2_errors))
 
         neuron_weight_gradients = weight_derivative(input_activations, layer1_neuron.weighted_sum, layer1_error)
         neuron_bias_gradient = bias_derivative(layer1_neuron.weighted_sum, layer1_error)
@@ -207,6 +183,7 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
         layer1_neuron.weight_gradients.append(neuron_weight_gradients)
         layer1_neuron.bias_gradients.append(neuron_bias_gradient)
 
+
 def updateGradients(layers):
     for layer in layers:
         for neuron in layer.neurons:
@@ -214,13 +191,13 @@ def updateGradients(layers):
             neuron.weight_gradients.clear()
             neuron.bias_gradients.clear()
 
+
 # Function to train the neural network
 def train(input_activations, expected_activations, layers):
     feedForwardInput(input_activations, layers)
     backPropagation(input_activations, expected_activations, layers[0], layers[1], layers[-1])   
 
     return cost(layers[-1].activations, expected_activations)
-
 
 
 # Retrieve the grayscale value of each pixel in an image
@@ -243,12 +220,12 @@ def initialiseImage(file_path):
          
 
 # Functions to save & load the neural network model
-def saveModel(layers, filename='model_data.pkl'):
+def saveModel(layers, filename=FILENAME):
     model_params = [layer.getParams() for layer in layers]
     with open(filename, 'wb') as file:
         pickle.dump(model_params, file)
     
-def loadModel(filename='model_data.pkl'):
+def loadModel(filename=FILENAME):
     with open(filename, 'rb') as file:
         model_params = pickle.load(file)
 
@@ -272,64 +249,87 @@ def initialiseModel():
     return layers
 
 def trainModel(epochs):
-    def update_plot(average_costs):
-        line.set_linewidth(0.35)
-        line.set_data(range(len(average_costs)), average_costs)
-
-        ax.set_ylim(0, 1)
-
-        ax.relim()
-        ax.autoscale_view()
-
-        plt.draw()
-        plt.pause(0.005)
 
     # Initialize plotting for a real-time graph
     if USE_LIVE_GRAPH:
         plt.ion() 
         ax = plt.subplots()[1]
-        ax.set_xlabel('Iteration')
-        ax.set_ylabel('Average Cost')
-        line, = ax.plot([], [], 'r-') 
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel('Loss')
+        ax.set_ylim(0, 1.6)
 
+        training_line, = ax.plot([], [], 'r-', label='Training Loss', linewidth=0.35) 
+        validation_line, = ax.plot([], [], 'b--', label='Validation Loss', linewidth=0.35) 
+        ax.legend()
 
     training_losses = []
+    validation_losses = []
     for _ in range(epochs):
-        epoch_losses = []
-        for i in range(DATA_SIZE):
-            for j in range(10):
-                image_array = initialiseImage(f'MNIST_dataset/{j}/{j}/{i}.png')
+        epoch_training_losses = []
+        epoch_validation_losses = []
 
+        # Validation
+        for i in range(VALIDATION_SIZE):
+            for j in range(10):
                 expected_output = [0] * 10
                 expected_output[j] = 1
+
+                image_array = initialiseImage(f'MNIST_dataset/{j}/{j}/{i+10001}.png')
+                feedForwardInput(image_array, layers)
+                cost_of_image = cost(layers[-1].activations, expected_output)
+                epoch_validation_losses.append(cost_of_image)
+
+        epoch_validation_loss = np.mean(epoch_validation_losses)
+        validation_losses.append(epoch_validation_loss)
+
+        # Training 
+        for i in range(DATA_SIZE):
+            for j in range(10):
+                expected_output = [0] * 10
+                expected_output[j] = 1
+
+                image_array = initialiseImage(f'MNIST_dataset/{j}/{j}/{i}.png')
                 cost_of_image = train(image_array, expected_output, layers)
-                epoch_losses.append(cost_of_image)
+                epoch_training_losses.append(cost_of_image)
             
             if i % BATCH_SIZE == 0: 
                 updateGradients(layers) 
-                
-        saveModel(layers) # Save the updated weights & biases
 
-        epoch_loss = np.mean(epoch_losses)
-        print(f'Epoch training loss: {epoch_loss}')
-        training_losses.append(epoch_loss)
+        epoch_training_loss = np.mean(epoch_training_losses)
+        print(f'{_} training loss: {epoch_training_loss}')
+        training_losses.append(epoch_training_loss)
+
+
+        
+        saveModel(layers) # Save the updated weights & biases after each epoch
 
         # Update the real-time graph with new data
-        if USE_LIVE_GRAPH: update_plot(training_losses)
+        if USE_LIVE_GRAPH:  
+            training_line.set_data(range(len(training_losses)), training_losses)
+            validation_line.set_data(range(len(validation_losses)), validation_losses)
 
-    # Plot a graph for training loss
+            ax.relim()
+            ax.autoscale_view()
+
+            plt.draw()
+            plt.pause(0.01)
+
+    # Plot a static graph for training loss
     if USE_STATIC_GRAPH:
-        plt.xlabel('Epoch')
-        plt.ylabel('Training loss')
-        plt.ylim(0, 1)
-        plt.plot(range(len(training_losses)), training_losses, linewidth=0.35)
-        plt.show() # Display the graph
+        ax = plt.subplots()[1]
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel('Loss')
+        ax.set_ylim(0, 1.6)
+
+        training_line, = ax.plot(range(len(training_losses)), training_losses, 'r-', label='Training Loss', linewidth=0.35) 
+        validation_line, = ax.plot(range(len(validation_losses)), validation_losses, 'b--', label='Validation Loss', linewidth=0.35) 
+        ax.legend()
+
+        plt.show() 
 
     # Turn off interactive mode
     if USE_LIVE_GRAPH: plt.ioff()  
     
-
-
 
 # Predict what digit is in an image by propagating its array through the layers
 def recogniseDigit(filename, layers):
