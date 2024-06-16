@@ -5,7 +5,7 @@ This neural network is able to take a 28x28 image as an input, and feed its pixe
 - Hidden Layer 1 (16 neurons)
 - Hidden Layer 2 (16 neurons)
 - Output Layer (10 neurons, each representing a digit)
-so, in total, ~13,000 weights & biases. For the activations, sigmoid is used.
+so, in total, ~13,000 weights & biases. For the activations, sigmoid is used.\n\n
 
 
 The program consists of several other features as well, which help analyse and use the data effectively, suuch as:
