@@ -1,5 +1,5 @@
 # Neural Network for Digit Recognition 
-I made this network (my first) to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math or other concepts such as the types of training). 
+I made this network (my first) to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math such as the activation functions or other concepts such as the types of training). 
 
 Note: It does **not** use libraries such as TensorFlow or PyTorch, as I thought it would be more useful in teaching myself such concepts by creating it from **scratch**.
 
