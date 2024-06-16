@@ -44,9 +44,7 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
     </tr>
 </table>
 
-
-
-
+</br>
  
  The program consists of several other features as well, which help analyse and use the data effectively, such as:
 - Method to save updated weights & biases using the pickle library.
