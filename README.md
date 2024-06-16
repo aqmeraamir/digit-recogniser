@@ -11,7 +11,7 @@ This neural network is able to take a 28x28 image as an input, and feed its pixe
 - Hidden Layer 2 (16 neurons)
 - Output Layer (10 neurons, each representing a digit)
 
-so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is used, overall making it a MLP (multilayer perceptron) with fully connected neurons and a non-linear activatin function.
+so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is used, overall making it a MLP (multilayer perceptron) with fully connected neurons and a non-linear activation function.
 
 <div align="center">
   <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture (image from 3Blue1Brown)" width=500></img>
