@@ -14,7 +14,7 @@ This neural network is able to take a 28x28 image as an input, and feed its pixe
 so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is used.
 
 <div align='centre'>
-  <img src="" alt="Neural Network Archhitecture" width=500></img>
+  <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/architecture.png" alt="Neural Network Archhitecture" width=500></img>
 </div>
 
 </br>
