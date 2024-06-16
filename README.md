@@ -1,1 +1,1 @@
-# Digit-Recognising-Neural-Network
+# Neural Network for Digit Recognition 
