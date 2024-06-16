@@ -34,11 +34,11 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
 <table align="center">
     <tr>
         <td align="center">
-            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Neural Network Architecture" style="width:500px; height:300px;">
+            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Graph 1" style="width:500px; height:300px;">
             <br><i>10,000 samples per digit; batch size of 10; learning rate 0.01; 25 epochs</i>
         </td>
         <td align="center">
-            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph2.gif" alt="Neural Network Architecture" style="width:500px; height:300px;">
+            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph2.gif" alt="Graph 2" style="width:500px; height:300px;">
             <br><i>stochastic gradient descent (used low no. of samples for display purposes); learning rate 0.01</i>
         </td>
     </tr>
@@ -48,5 +48,7 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
  
  The program consists of several other features as well, which help analyse and use the data effectively, such as:
 - Method to save updated weights & biases using the pickle library.
-- Easily scalable, and will work with any number of neurons in each layer
+- Uses layer & neuron classes so it is easily scalable, and will work with any number of neurons in each layer.
 - User interface
+
+img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/user_interface.png" alt="User Interface" style="width:500px; height:300px;">
