@@ -15,6 +15,7 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 
 <div align="center">
   <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
+  
   <i>credit: 3Blue1Brown</i>
 </div>
 
