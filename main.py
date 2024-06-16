@@ -11,8 +11,6 @@ Notes:
     3. hidden layer 2 (16 neurons, each with 16 weights)
     4. output layer (10 neurons with each representing a digit between 0-9; each neuron has 16 weights)
 
-- includes a graph of how cost changes as the network is trained
-
 '''
 
 # Importing libraries
@@ -32,9 +30,10 @@ LAYER1_SIZE = 16
 LAYER2_SIZE = 16
 OUTPUT_SIZE = 10
 
-DATA_SIZE = 10000
+DATA_SIZE = 10000 # MAX 10000
 BATCH_SIZE = 1
-VALIDATION_SIZE = 500
+VALIDATION_SIZE = 700 # MAX 700
+USE_STOCHASTIC = False # Set to false if using batches
 
 USE_LIVE_GRAPH = True
 USE_STATIC_GRAPH = False
@@ -152,9 +151,10 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
         neuron_weight_gradients = weight_derivative(layer2.activations, output_neuron.activation, output_errors[i])
         neuron_bias_gradient = bias_derivative(output_neuron.activation, output_errors[i])
 
-        #output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
-        output_neuron.weight_gradients.append(neuron_weight_gradients)
-        output_neuron.bias_gradients.append(neuron_bias_gradient)
+        if USE_STOCHASTIC: output_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients for stochastic gradient descent
+        else: 
+            output_neuron.weight_gradients.append(neuron_weight_gradients)
+            output_neuron.bias_gradients.append(neuron_bias_gradient)
 
     # Layer 2
     layer2_errors = np.zeros(len(layer2.neurons))
@@ -166,9 +166,10 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
         neuron_weight_gradients = weight_derivative(layer1.activations, layer2_neuron.weighted_sum, layer2_errors[j])
         neuron_bias_gradient = bias_derivative(layer2_neuron.weighted_sum, layer2_errors[j])
         
-        #layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
-        layer2_neuron.weight_gradients.append(neuron_weight_gradients)
-        layer2_neuron.bias_gradients.append(neuron_bias_gradient)
+        if USE_STOCHASTIC: layer2_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients for stochastic gradient descent
+        else:
+            layer2_neuron.weight_gradients.append(neuron_weight_gradients)
+            layer2_neuron.bias_gradients.append(neuron_bias_gradient)
 
     # Layer 1
     input_activations = np.array(input_activations)
@@ -180,9 +181,10 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
         neuron_weight_gradients = weight_derivative(input_activations, layer1_neuron.weighted_sum, layer1_error)
         neuron_bias_gradient = bias_derivative(layer1_neuron.weighted_sum, layer1_error)
 
-        #layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients
-        layer1_neuron.weight_gradients.append(neuron_weight_gradients)
-        layer1_neuron.bias_gradients.append(neuron_bias_gradient)
+        if USE_STOCHASTIC: layer1_neuron.update_gradient(neuron_weight_gradients, neuron_bias_gradient) # Adjust the weights & biases with gradients for stochastic gradient descent
+        else:
+            layer1_neuron.weight_gradients.append(neuron_weight_gradients)
+            layer1_neuron.bias_gradients.append(neuron_bias_gradient)
 
 
 def updateGradients(layers):
@@ -255,9 +257,9 @@ def trainModel(epochs):
     if USE_LIVE_GRAPH:
         plt.ion() 
         ax = plt.subplots()[1]
-        ax.set_xlabel('Epoch')
+        ax.set_xlabel('Iteration')
         ax.set_ylabel('Loss')
-        ax.set_ylim(0, 0.4)
+        ax.set_ylim(0, 1.4)
 
         training_line, = ax.plot([], [], 'r-', label='Training Loss', linewidth=0.35) 
         validation_line, = ax.plot([], [], 'b--', label='Validation Loss', linewidth=0.35) 
@@ -293,8 +295,9 @@ def trainModel(epochs):
                 cost_of_image = train(image_array, expected_output, layers)
                 epoch_training_losses.append(cost_of_image)
             
-            if i % BATCH_SIZE == 0: 
-                updateGradients(layers) 
+            if USE_STOCHASTIC == False:
+                if i % BATCH_SIZE == 0: 
+                    updateGradients(layers) 
 
         epoch_training_loss = np.mean(epoch_training_losses)
         print(f'{_} training loss: {epoch_training_loss}')
