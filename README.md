@@ -13,12 +13,17 @@ This neural network is able to take a 28x28 image as an input, and feed its pixe
 
 so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is used.
 
+<div align='centre'>
+  <img src="" alt="Neural Network Archhitecture" width=500></img>
+</div>
+
 </br>
 
 The program consists of several other features as well, which help analyse and use the data effectively, such as:
 - Loss vs Epoch graph (which can be updated live as the network is being trained, or shown as a static once training is complete)
 - Method to save updated weights & biases using the pickle library.
 - Easily scalable, and will work with any number of neurons in each layer
+- User interface
 
 </br>
 
