@@ -27,4 +27,10 @@ The program consists of several other features as well, which help analyse and u
 
 </br>
 
+## Training
+The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent. However, the program can easily be modified to change
+the batch size, and switch to full batch gradient descent or stoachastic gradient descent. 
 
+The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with.
+
+ 
