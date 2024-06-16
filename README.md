@@ -35,11 +35,11 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
     <tr>
         <td align="center">
             <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Neural Network Architecture" style="width:500px; height:300px;">
-            <br><i>10,000 samples per digit; batch size of 10; learning rate 0.01; epochs</i>
+            <br><i>10,000 samples per digit; batch size of 10; learning rate 0.01; 25 epochs</i>
         </td>
         <td align="center">
             <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph2.gif" alt="Neural Network Architecture" style="width:500px; height:300px;">
-            <br><i>stochastic gradient descent (used low no. of samples for display purposes); learning rate 0.01; epochs</i>
+            <br><i>stochastic gradient descent (used low no. of samples for display purposes); learning rate 0.01</i>
         </td>
     </tr>
 </table>
