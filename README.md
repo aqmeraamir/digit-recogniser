@@ -1,5 +1,5 @@
 # Neural Network for Digit Recognition 
-I made this network to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math or other concepts such as the types of training). 
+I made this network (my first) to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math or other concepts such as the types of training). 
 
 Note: It does **not** use libraries such as TensorFlow or PyTorch, as I thought it would be more useful in teaching myself such concepts by creating it from scratch.
 
@@ -29,17 +29,17 @@ the batch size, and switch to **full batch** gradient descent or **stochastic** 
 
 The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with. 
 
-Training also includes a **Loss vs Epoch graph** which can be shown live as its trained or statically once training is complete, helping find the perfect number of epochs required.
+Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which can be shown live as its trained or statically once training is complete, helping find the perfect number of epochs required. Some demonstrations:
 
 <table align="center">
     <tr>
         <td align="center">
             <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Neural Network Architecture" width="500">
-            <br><i>trained with 10,000 samples per digit; batch size of 10</i>
+            <br><i>10,000 samples per digit; batch size of 10; learning rate 0.01; epochs</i>
         </td>
         <td align="center">
-            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Architecture" width="500">
-            <br><i>Neural Network Architecture</i>
+            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph2.gif" alt="Neural Network Architecture" width="500">
+            <br><i>stochastic gradient descent (used low no. of samples for display purposes); learning rate 0.01; epochs</i>
         </td>
     </tr>
 </table>
