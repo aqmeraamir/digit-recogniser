@@ -27,8 +27,9 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent. However, the program can easily be modified to change
 the batch size, and switch to **full batch** gradient descent or **stoachastic** gradient descent. 
 
-The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with. Training also includes a **Loss vs Epoch graph** which can be 
-shown live as its trained or statically once training is complete
+The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with. 
+
+Training also includes a **Loss vs Epoch graph** which can be shown live as its trained or statically once training is complete, helping find the perfect number of epochs required.
 
 <div align="center">
   <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
