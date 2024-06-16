@@ -46,10 +46,7 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
     </tr>
 </table>
 
-</br>
-
- # 
-
+ ## 
  
  The program consists of several other features as well, which help analyse and use the data effectively, such as:
 - Method to save updated weights & biases using the pickle library.
@@ -58,5 +55,6 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
 
 <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/user_interface.png" alt="User Interface" style="width:500px; height:300px;"> 
 
+##
 
 *There are two other programs in ```Test Neural Networks/``` which were used to help create the final image recognition program. For example the 1 bit recogniser, which helped integratating back propagation as it was much easier working with a single neuron in each layer, before developing the back propagation for multiple neurons.*
