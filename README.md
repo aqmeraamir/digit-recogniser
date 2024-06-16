@@ -35,7 +35,7 @@ Training also includes a **Loss vs Epoch graph** which can be shown live as its 
     <tr>
         <td align="center">
             <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Neural Network Architecture" width="500">
-            <br><i>Neural Network Architecture</i>
+            <br><i>trained with 10,000 samples per digit; batch size of 10</i>
         </td>
         <td align="center">
             <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Architecture" width="500">
