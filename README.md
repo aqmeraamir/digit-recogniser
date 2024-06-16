@@ -51,4 +51,4 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
 - Uses layer & neuron classes so it is easily scalable, and will work with any number of neurons in each layer.
 - User interface
 
-img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/user_interface.png" alt="User Interface" style="width:500px; height:300px;">
+<img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/user_interface.png" alt="User Interface" style="width:500px; height:300px;"> 
