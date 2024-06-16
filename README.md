@@ -21,18 +21,25 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 
 </br>
 
-The program consists of several other features as well, which help analyse and use the data effectively, such as:
-- Loss vs Epoch graph (which can be updated live as the network is being trained, or shown as a static once training is complete)
-- Method to save updated weights & biases using the pickle library.
-- Easily scalable, and will work with any number of neurons in each layer
-- User interface
 
-</br>
 
 ## Training
 The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent. However, the program can easily be modified to change
 the batch size, and switch to **full batch** gradient descent or **stoachastic** gradient descent. 
 
-The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with.
+The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with. Training also includes a **Loss vs Epoch graph** which can be 
+shown live as its trained or statically once training is complete
+
+<div align="center">
+  <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
+  <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
+</div>
+
+
+
 
  
+ The program consists of several other features as well, which help analyse and use the data effectively, such as:
+- Method to save updated weights & biases using the pickle library.
+- Easily scalable, and will work with any number of neurons in each layer
+- User interface
