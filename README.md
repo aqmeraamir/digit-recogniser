@@ -25,16 +25,24 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 
 ## Training
 The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent. However, the program can easily be modified to change
-the batch size, and switch to **full batch** gradient descent or **stoachastic** gradient descent. 
+the batch size, and switch to **full batch** gradient descent or **stochastic** gradient descent. 
 
 The pre-trained data can be reset, and the user can specify the number of epochs they wish to train the network with. 
 
 Training also includes a **Loss vs Epoch graph** which can be shown live as its trained or statically once training is complete, helping find the perfect number of epochs required.
 
-<div align="center">
-  <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
-  <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Archhitecture" width=500></img>
-</div>
+<table align="center">
+    <tr>
+        <td align="center">
+            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/graph1.png" alt="Neural Network Architecture" width="500">
+            <br><i>Neural Network Architecture</i>
+        </td>
+        <td align="center">
+            <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/network_architecture.png" alt="Neural Network Architecture" width="500">
+            <br><i>Neural Network Architecture</i>
+        </td>
+    </tr>
+</table>
 
 
 
