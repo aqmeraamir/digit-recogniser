@@ -24,6 +24,8 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 
 
 ## Training
+The network uses back-propagation and gradient descent, with the required calculus and linear algebra from [Backpropagation Calculus](https://www.youtube.com/watch?v=tIeHLnjs5U8&t=307s)
+
 The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent with the [**MNIST dataset**](https://www.kaggle.com/datasets/hojjatk/mnist-dataset). However, the program can easily be modified to change
 the batch size, and switch to **full batch** gradient descent or **stochastic** gradient descent. 
 
