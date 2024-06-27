@@ -1,7 +1,7 @@
 # Neural Network for Digit Recognition 
-I made this network (my first) to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math or other concepts such as the types of training). 
+I made this network (my first) to introduce myself to deep learning, and it is largely based on [3Blue1Brown's playlist](https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) on neural networks, where the concepts, and relevant math was explained, although I used other resources too (mostly for explaining the math such as the activation functions or other concepts such as the types of training). 
 
-Note: It does **not** use libraries such as TensorFlow or PyTorch, as I thought it would be more useful in teaching myself such concepts by creating it from scratch.
+Note: It does **not** use libraries such as TensorFlow or PyTorch, as I thought it would be more useful in teaching myself such concepts by creating it from **scratch**.
 
 
 ## Architecture
@@ -24,6 +24,8 @@ so, in total, ~13,000 weights & biases. And for the activations, **sigmoid** is 
 
 
 ## Training
+The network uses back-propagation and gradient descent, with the required calculus and linear algebra from [Chapter 4, Deep Learning](https://www.youtube.com/watch?v=tIeHLnjs5U8&t=307s)
+
 The repository includes a pre-trained ```model_data.pkl``` file, which has been trained using **mini-batch** gradient descent with the [**MNIST dataset**](https://www.kaggle.com/datasets/hojjatk/mnist-dataset). However, the program can easily be modified to change
 the batch size, and switch to **full batch** gradient descent or **stochastic** gradient descent. 
 
@@ -44,7 +46,7 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
     </tr>
 </table>
 
-</br>
+ ## 
  
  The program consists of several other features as well, which help analyse and use the data effectively, such as:
 - Method to save updated weights & biases using the pickle library.
@@ -52,3 +54,7 @@ Training also includes a **Loss vs Epoch graph** (also loss vs iteration) which 
 - User interface
 
 <img src="https://github.com/aqmeraamir/digit-recognising-neural-network/blob/main/images/user_interface.png" alt="User Interface" style="width:500px; height:300px;"> 
+
+##
+
+*There are two other programs in ```Test Neural Networks/``` which were used to help create the final image recognition program. For example the 1 bit recogniser, which helped integratating back propagation as it was much easier working with a single neuron in each layer, before developing the back propagation for multiple neurons.*
