@@ -42,7 +42,6 @@ USE_STATIC_GRAPH = False
 # Classes for neurons & layers
 #-------------------------------------------
 class Neuron:
-   
     def __init__(self, weights_required):
         self.weights = np.random.randn(weights_required) * np.sqrt(2 / weights_required)
         self.bias = 0
@@ -54,7 +53,7 @@ class Neuron:
         self.bias_gradients = []
 
     def update_gradient(self, grad_w, grad_b):
-        grad_w = np.array(grad_w).flatten()
+        grad_w = np.array(grad_w).flatten() 
         self.weights -= (np.array(grad_w) * LEARNING_RATE)
         self.bias -= (grad_b * LEARNING_RATE)
     
@@ -75,7 +74,7 @@ class Layer:
         for _ in range(neurons_required):
             self.neurons.append(Neuron(weights_per_neuron))
 
-    
+    # Function for forward propagation    
     def feedForward(self, previous_activations):
         self.weighted_sums = []
 
@@ -187,6 +186,7 @@ def backPropagation(input_activations, expected_activations, layer1, layer2, out
             layer1_neuron.bias_gradients.append(neuron_bias_gradient)
 
 
+# Find the mean weights and biases and update all the gradients (for batch)
 def updateGradients(layers):
     for layer in layers:
         for neuron in layer.neurons:
@@ -195,7 +195,7 @@ def updateGradients(layers):
             neuron.bias_gradients.clear()
 
 
-# Function to train the neural network
+# Function to train the neural network through back propagation / returns the cost of the training example
 def train(input_activations, expected_activations, layers):
     feedForwardInput(input_activations, layers)
     backPropagation(input_activations, expected_activations, layers[0], layers[1], layers[-1])   
@@ -245,19 +245,21 @@ def loadModel(filename=FILENAME):
     return layers
 
 
-# Functions to initialise (reset), train or feed input into the model for the user interface
+# Function to reinitialise (reset) the model
 def initialiseModel():
     layers = [Layer(LAYER1_SIZE, 784), Layer(LAYER2_SIZE, LAYER1_SIZE), Layer(OUTPUT_SIZE, LAYER2_SIZE)]
     saveModel(layers)
     return layers
 
+
+# Function to train the model for a specific number of epochs given by the user, also manages the graphing
 def trainModel(epochs):
 
     # Initialize plotting for a real-time graph
     if USE_LIVE_GRAPH:
         plt.ion() 
         ax = plt.subplots()[1]
-        ax.set_xlabel('Iteration')
+        ax.set_xlabel('Epoch')
         ax.set_ylabel('Loss')
         ax.set_ylim(0, 1.4)
 
@@ -295,9 +297,8 @@ def trainModel(epochs):
                 cost_of_image = train(image_array, expected_output, layers)
                 epoch_training_losses.append(cost_of_image)
             
-            if USE_STOCHASTIC == False:
-                if i % BATCH_SIZE == 0: 
-                    updateGradients(layers) 
+            if USE_STOCHASTIC == False and i % BATCH_SIZE == 0: 
+                updateGradients(layers) 
 
         epoch_training_loss = np.mean(epoch_training_losses)
         print(f'{_} training loss: {epoch_training_loss}')
@@ -333,7 +334,7 @@ def trainModel(epochs):
     if USE_LIVE_GRAPH: plt.ioff()  
     
 
-# Predict what digit is in an image by propagating its array through the layers
+# Predicts what digit is in an image by processing the filename, and propagating its grayscale array through the model
 def recogniseDigit(filename, layers):
     image_array = initialiseImage(filename)
     
@@ -355,6 +356,22 @@ def recogniseDigit(filename, layers):
             count += 1
 
         print(f'\nNUMBER IS LIKELY: {highest_number}')
+
+
+# Models the given weights, with green indicating a high weight and red a low.
+def displayWeights(weights):
+    side_length = int(np.sqrt(weights.size))
+    weights = weights.reshape((side_length, side_length))
+    min_weight = np.min(weights)
+    max_weight = np.max(weights)
+    normalized_weights = (weights - min_weight) / (max_weight - min_weight)
+
+    cmap = plt.cm.RdYlGn
+
+    plt.imshow(normalized_weights, cmap=cmap, vmin=0, vmax=1)
+    plt.colorbar()  
+    plt.title('Weights Visualization')
+    plt.show()
 
 
 #-----------------------------------------
